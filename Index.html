@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chia sẻ ảnh</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 24px;
+  }
+  button {
+    background: #111111;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 32px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+  img { max-width: 100%; max-height: 70vh; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <button id="pickBtn">Thêm hình ảnh</button>
+  <input type="file" id="fileInput" accept="image/*" class="hidden">
+  <img id="preview" class="hidden" alt="">
+  <button id="exportBtn" class="hidden">Xuất trang chia sẻ</button>
+
+<script>
+  const pickBtn = document.getElementById('pickBtn');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const exportBtn = document.getElementById('exportBtn');
+  let dataUrl = null;
+
+  pickBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      dataUrl = reader.result;
+      preview.src = dataUrl;
+      preview.classList.remove('hidden');
+      exportBtn.classList.remove('hidden');
+      pickBtn.textContent = 'Chọn ảnh khác';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  exportBtn.addEventListener('click', () => {
+    if (!dataUrl) return;
+    const page = '<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+      '<title>Ảnh chia sẻ</title>\n<style>*{margin:0;padding:0}body{background:#fff;min-height:100vh;' +
+      'display:flex;align-items:center;justify-content:center}img{max-width:100%;max-height:100vh}</style>\n' +
+      '</head>\n<body>\n<img src="' + dataUrl + '" alt="">\n</body>\n</html>';
+    const blob = new Blob([page], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'anh-chia-se.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+</script>
+</body>
+</html>
